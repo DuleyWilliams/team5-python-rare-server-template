@@ -2,6 +2,8 @@ import sqlite3
 import json
 from datetime import datetime
 
+from models.user import User
+
 def login_user(user):
     """Checks for the user in the database
 
@@ -69,3 +71,56 @@ def create_user(user):
             'token': id,
             'valid': True
         })
+        
+def get_all_users():
+    #open a connection to the database
+    with sqlite3.connect("./db.sqlite3") as conn:
+        #create black box
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        
+        #write the sql query to get the needed info
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.first_name,
+            a.last_name,
+            a.email,
+            a.bio,
+            a.username
+        FROM Users a
+        """)
+        
+        #initialize an empty list to hold all users
+        users = []
+        
+        #convert rows of data into python list
+        dataset = db_cursor.fetchall()
+        
+        for row in dataset:
+            user = User(row['id'], row['first_name'], row['last_name'],
+                        row['email'], row['bio'], row['username'])
+            
+            users.append(user.__dict__)
+            
+    return json.dumps(users)
+        
+# def get_user_names():
+#     with sqlite3.connect("./db.sqlite3") as conn:
+#         conn.row_factory = sqlite3.Row
+#         db_cursor = conn.cursor()
+        
+#         db_cursor.execute("""
+#         SELECT
+#             a.id,
+#             a.first_name,
+#             a.last_name
+#         FROM Users a
+#         """)
+        
+#         users = []
+        
+#         dataset = db_cursor.fetchall()
+        
+#         for row in dataset:
+#             user = User(row['id'], row['first_name'], row['last_name'])
